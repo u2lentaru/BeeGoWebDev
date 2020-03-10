@@ -1,4 +1,3 @@
-{{define "blog"}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,4 +15,3 @@
     <div><a href="/new">New&nbspPost</a></div>
 </body>
 </html>
-{{end}}
