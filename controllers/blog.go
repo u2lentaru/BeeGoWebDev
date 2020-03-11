@@ -24,7 +24,8 @@ func (c *BlogController) Get() {
 		return
 	}
 
-	c.Data["Blogs"] = blog
+	//c.Data["Blogs"] = blog
+	c.Data["PostList"] = blog.PostList
 	c.TplName = "blogs.tpl"
 }
 
@@ -48,15 +49,29 @@ func getBlog(db *sql.DB, id string) (models.TBlog, error) {
 
 	blog := models.TBlog{}
 	//blog := make(models.TBlog, 0, 1)
-
+	log.Println(db)
+	log.Println(id)
+	if err := db.Ping(); err != nil {
+		log.Println("2 db not pinged!")
+		log.Fatal(err)
+	}
+	log.Println("2 db pinged!")
 	row := db.QueryRow("select * from myblog.blogs where blogs.id = ?", id)
 	err := row.Scan(&blog.ID, &blog.Name, &blog.Title)
 	if err != nil {
+		log.Println("1 query")
 		return models.TBlog{}, err
 	}
 
+	if err := db.Ping(); err != nil {
+		log.Println("3 db not pinged!")
+		log.Fatal(err)
+	}
+	log.Println("3 db pinged!")
+
 	rows, err := db.Query("select * from posts where blogid = ?", id)
 	if err != nil {
+		log.Println("2 query")
 		return models.TBlog{}, err
 	}
 	defer rows.Close()
@@ -72,6 +87,6 @@ func getBlog(db *sql.DB, id string) (models.TBlog, error) {
 		}
 		blog.PostList = append(blog.PostList, post)
 	}
-
+	log.Println(blog)
 	return blog, nil
 }
