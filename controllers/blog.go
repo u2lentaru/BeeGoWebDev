@@ -3,6 +3,9 @@ package controllers
 import (
 	"BeeGoWebDev/models"
 	"database/sql"
+	"encoding/json"
+	"io"
+	"io/ioutil"
 	"log"
 
 	"github.com/astaxie/beego"
@@ -34,6 +37,7 @@ func getBlog(db *sql.DB, id string) (models.TBlog, error) {
 	if err := db.Ping(); err != nil {
 		log.Fatal(err)
 	}
+
 	row := db.QueryRow("select * from myblog.blogs where blogs.id = ?", id)
 	err := row.Scan(&blog.ID, &blog.Name, &blog.Title)
 	if err != nil {
@@ -59,7 +63,65 @@ func getBlog(db *sql.DB, id string) (models.TBlog, error) {
 			log.Println(err)
 			continue
 		}
+
 		blog.PostList = append(blog.PostList, post)
 	}
+
 	return blog, nil
+}
+
+type postRequest struct {
+	Subj     string `json:"subj"`
+	PostTime string `json:"posttime"`
+	Text     string `json:"text"`
+}
+
+/*
+	curl -vX POST -H "Content-Type: application/json"  -d'{"subj":"NewSubj",
+"posttime":"02.02.2020","text":"NewText"}' http://localhost:8080/
+*/
+
+// Post func
+func (c *BlogController) Post() {
+	resp := new(postRequest)
+	if err := readAndUnmarshall(resp, c.Ctx.Request.Body); err != nil {
+		c.Ctx.ResponseWriter.WriteHeader(500)
+		_, _ = c.Ctx.ResponseWriter.Write([]byte(err.Error()))
+		return
+	}
+
+	post := models.TPost{
+		Subj:     resp.Subj,
+		PostTime: resp.PostTime,
+		Text:     resp.Text,
+	}
+
+	if err := createPost(c.Db, c.currBlog, post); err != nil {
+		c.Ctx.ResponseWriter.WriteHeader(500)
+		_, _ = c.Ctx.ResponseWriter.Write([]byte(err.Error()))
+		return
+	}
+
+	c.Ctx.ResponseWriter.WriteHeader(200)
+	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS\n`))
+}
+
+func readAndUnmarshall(resp interface{}, body io.ReadCloser) error {
+	bytes, err := ioutil.ReadAll(body)
+	if err != nil {
+		log.Print("empty id")
+		return err
+	}
+
+	if err := json.Unmarshal(bytes, resp); err != nil {
+		return err
+	}
+	return nil
+}
+
+func createPost(db *sql.DB, currBlog string, post models.TPost) error {
+	_, err := db.Exec("insert into myblog.posts (blogid,subj,posttime,text) values (?,??,?)",
+		currBlog, post.Subj, post.PostTime, post.Text)
+
+	return err
 }
