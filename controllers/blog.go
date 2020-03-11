@@ -77,7 +77,7 @@ type postRequest struct {
 }
 
 /*
-	curl -vX POST -H "Content-Type: application/json"  -d'{"subj":"NewSubj",
+	curl.exe -vX POST -H "Content-Type: application/json"  -d'{"subj":"NewSubj",
 "posttime":"02.02.2020","text":"NewText"}' http://localhost:8080/
 */
 
@@ -120,8 +120,86 @@ func readAndUnmarshall(resp interface{}, body io.ReadCloser) error {
 }
 
 func createPost(db *sql.DB, currBlog string, post models.TPost) error {
-	_, err := db.Exec("insert into myblog.posts (blogid,subj,posttime,text) values (?,??,?)",
+	_, err := db.Exec("insert into myblog.posts (blogid,subj,posttime,text) values (?,?,?,?)",
 		currBlog, post.Subj, post.PostTime, post.Text)
 
 	return err
+}
+
+/*
+	curl -vX PUT -H "Content-Type: application/json"  -d'{"subj":"NewSubj",
+"posttime":"02.02.2020","text":"NewText"}' http://localhost:8090/lists?id=131
+*/
+
+// Put func
+func (c *BlogController) Put() {
+	id := c.Ctx.Request.URL.Query().Get("id")
+
+	if len(id) == 0 {
+		c.Ctx.ResponseWriter.WriteHeader(500)
+		_, _ = c.Ctx.ResponseWriter.Write([]byte("empty id"))
+		return
+	}
+
+	resp := new(postRequest)
+
+	if err := readAndUnmarshall(resp, c.Ctx.Request.Body); err != nil {
+		c.Ctx.ResponseWriter.WriteHeader(500)
+		_, _ = c.Ctx.ResponseWriter.Write([]byte(err.Error()))
+		return
+	}
+
+	post := models.TPost{
+		Subj:     resp.Subj,
+		PostTime: resp.PostTime,
+		Text:     resp.Text,
+	}
+
+	if err := updatePost(c.Db, id, post.Subj, post.PostTime, post.Text); err != nil {
+		c.Ctx.ResponseWriter.WriteHeader(500)
+		_, _ = c.Ctx.ResponseWriter.Write([]byte(err.Error()))
+	}
+
+	c.Ctx.ResponseWriter.WriteHeader(200)
+	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS`))
+}
+
+func updatePost(db *sql.DB, id, subj, posttime, text string) error {
+	if len(subj) == 0 && len(posttime) == 0 && len(text) == 0 {
+		return nil
+	}
+
+	_, err := db.Exec("UPDATE `myblog`.`posts` SET `subj`=?, `posttime`=?, `text`=? WHERE (`id` = ?)",
+		subj, posttime, text, id)
+
+	return err
+}
+
+/*
+	curl -vX DELETE  http://localhost:8090/lists?id=133
+*/
+
+// Delete func
+func (c *BlogController) Delete() {
+	id := c.Ctx.Request.URL.Query().Get("id")
+
+	err := deletePost(c.Db, id)
+
+	if err != nil {
+		c.Ctx.ResponseWriter.WriteHeader(500)
+		_, _ = c.Ctx.ResponseWriter.Write([]byte(err.Error()))
+	}
+
+	c.Ctx.ResponseWriter.WriteHeader(200)
+	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS`))
+}
+
+func deletePost(db *sql.DB, id string) error {
+	_, err := db.Exec("DELETE FROM myblog.posts WHERE `id`=?", id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
