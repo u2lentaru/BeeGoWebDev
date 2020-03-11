@@ -120,15 +120,15 @@ func readAndUnmarshall(resp interface{}, body io.ReadCloser) error {
 }
 
 func createPost(db *sql.DB, currBlog string, post models.TPost) error {
-	_, err := db.Exec("insert into myblog.posts (blogid,subj,posttime,text) values (?,?,?,?)",
+	_, err := db.Exec("insert into myblog.posts (blogid,subj,posttime,posttext) values (?,?,?,?)",
 		currBlog, post.Subj, post.PostTime, post.Text)
 
 	return err
 }
 
 /*
-	curl -vX PUT -H "Content-Type: application/json"  -d'{"subj":"NewSubj",
-"posttime":"02.02.2020","text":"NewText"}' http://localhost:8090/lists?id=131
+	curl.exe -vX PUT -H "Content-Type: application/json"  -d'{"subj":"NewSubj",
+"posttime":"02.02.2020","text":"NewText"}' http://localhost:8080?id=131
 */
 
 // Put func
@@ -169,14 +169,14 @@ func updatePost(db *sql.DB, id, subj, posttime, text string) error {
 		return nil
 	}
 
-	_, err := db.Exec("UPDATE `myblog`.`posts` SET `subj`=?, `posttime`=?, `text`=? WHERE (`id` = ?)",
+	_, err := db.Exec("UPDATE `myblog`.`posts` SET `subj`=?, `posttime`=?, `posttext`=? WHERE (`id` = ?)",
 		subj, posttime, text, id)
 
 	return err
 }
 
 /*
-	curl -vX DELETE  http://localhost:8090/lists?id=133
+	curl.exe -vX DELETE  http://localhost:8080?id=42
 */
 
 // Delete func
