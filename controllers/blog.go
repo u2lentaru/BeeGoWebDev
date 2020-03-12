@@ -129,8 +129,13 @@ func createPost(db *sql.DB, currBlog string, post models.TPost) error {
 	return err
 }
 
+type putRequest struct {
+	Name  string `json:"name"`
+	Title string `json:"title"`
+}
+
 /*
-	curl.exe -vX PUT -H "Content-Type: application/json"  -d"@update.json"" http://localhost:8080?id=131
+	curl.exe -vX PUT -H "Content-Type: application/json"  -d"@update.json" http://localhost:8080?id=1
 */
 
 // Put func
@@ -143,7 +148,7 @@ func (c *BlogController) Put() {
 		return
 	}
 
-	resp := new(postRequest)
+	resp := new(putRequest)
 
 	if err := readAndUnmarshall(resp, c.Ctx.Request.Body); err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(500)
@@ -151,13 +156,12 @@ func (c *BlogController) Put() {
 		return
 	}
 
-	post := models.TPost{
-		Subj:     resp.Subj,
-		PostTime: resp.PostTime,
-		PostText: resp.PostText,
+	blog := models.TBlog{
+		Name:  resp.Name,
+		Title: resp.Title,
 	}
 
-	if err := updatePost(c.Db, id, post.Subj, post.PostTime, post.PostText); err != nil {
+	if err := updatePost(c.Db, id, blog.Name, blog.Title); err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(500)
 		_, _ = c.Ctx.ResponseWriter.Write([]byte(err.Error()))
 	}
@@ -166,13 +170,13 @@ func (c *BlogController) Put() {
 	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS`))
 }
 
-func updatePost(db *sql.DB, id, subj, posttime, posttext string) error {
-	if len(subj) == 0 && len(posttime) == 0 && len(posttext) == 0 {
+func updatePost(db *sql.DB, id, name, title string) error {
+	if len(name) == 0 && len(title) == 0 {
 		return nil
 	}
 
-	_, err := db.Exec("UPDATE `myblog`.`posts` SET `subj`=?, `posttime`=?, `posttext`=? WHERE (`id` = ?)",
-		subj, posttime, posttext, id)
+	_, err := db.Exec("UPDATE myblog.blogs SET name=?, title=? WHERE id=?",
+		name, title, id)
 
 	return err
 }
