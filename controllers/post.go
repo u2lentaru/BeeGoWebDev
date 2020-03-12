@@ -3,85 +3,63 @@ package controllers
 import (
 	"BeeGoWebDev/models"
 	"database/sql"
-	"encoding/json"
-	"io"
-	"io/ioutil"
 	"log"
 
 	"github.com/astaxie/beego"
 )
 
-// BlogController struct
-type BlogController struct {
+// PostController struct
+type PostController struct {
 	beego.Controller
 	Db       *sql.DB
 	currBlog string
 }
 
 // Get func
-func (c *BlogController) Get() {
+func (c *PostController) Get() {
 	c.currBlog = "1"
-	blog, err := getBlog(c.Db, c.currBlog)
+	id := c.Ctx.Request.URL.Query().Get("id")
+
+	if len(id) == 0 {
+		c.Ctx.ResponseWriter.WriteHeader(500)
+		_, _ = c.Ctx.ResponseWriter.Write([]byte("empty id"))
+		return
+	}
+
+	post, err := getPost(c.Db, c.currBlog, id)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	c.Data["Blog"] = blog
-	c.TplName = "blogs.tpl"
+	c.Data["Post"] = post
+	c.TplName = "post.tpl"
 }
 
-func getBlog(db *sql.DB, id string) (models.TBlog, error) {
-	blog := models.TBlog{}
-	//blog := make(models.TBlog, 0, 1)
-	if err := db.Ping(); err != nil {
-		log.Fatal(err)
-	}
+func getPost(db *sql.DB, blogid, id string) (models.TPost, error) {
+	post := models.TPost{}
 
-	row := db.QueryRow("select * from myblog.blogs where blogs.id = ?", id)
-	err := row.Scan(&blog.ID, &blog.Name, &blog.Title)
+	row := db.QueryRow("select * from myblog.posts where blogs.id = ?", id)
+	err := row.Scan(&post.ID, &post.Subj, &post.PostTime, &post.PostText)
 	if err != nil {
-		return models.TBlog{}, err
+		return models.TPost{}, err
 	}
 
-	if err := db.Ping(); err != nil {
-		log.Fatal(err)
-	}
-
-	rows, err := db.Query("select * from posts where blogid = ?", id)
-	if err != nil {
-		return models.TBlog{}, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		post := models.TPost{}
-		//post := make(models.TPost, 0, 1)
-
-		err := rows.Scan(&post.ID, new(int), &post.Subj, &post.PostTime, &post.PostText)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		blog.PostList = append(blog.PostList, post)
-	}
-
-	return blog, nil
+	return post, nil
 }
 
-type postRequest struct {
+/*type postRequest struct {
 	Subj     string `json:"subj"`
 	PostTime string `json:"posttime"`
 	PostText string `json:"posttext"`
-}
+}*/
 
 /*
 	curl.exe -vX POST -H "Content-Type: application/json"  -d "@data.json" http://localhost:8080/
 */
 
 // Post func
-func (c *BlogController) Post() {
+func (c *PostController) Post() {
 	c.currBlog = "1"
 
 	resp := new(postRequest)
@@ -98,8 +76,6 @@ func (c *BlogController) Post() {
 		PostText: resp.PostText,
 	}
 
-	//log.Printf("post %v", post)
-
 	if err := createPost(c.Db, c.currBlog, post); err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(500)
 		_, _ = c.Ctx.ResponseWriter.Write([]byte(err.Error()))
@@ -110,36 +86,24 @@ func (c *BlogController) Post() {
 	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS\n`))
 }
 
-func readAndUnmarshall(resp interface{}, body io.ReadCloser) error {
-	bytes, err := ioutil.ReadAll(body)
-	if err != nil {
-		log.Print("empty id")
-		return err
-	}
-	if err := json.Unmarshal(bytes, resp); err != nil {
-		return err
-	}
-	return nil
-}
-
-func createPost(db *sql.DB, currBlog string, post models.TPost) error {
+/*func createPost(db *sql.DB, currBlog string, post models.TPost) error {
 	_, err := db.Exec("insert into myblog.posts (blogid,subj,posttime,posttext) values (?,?,?,?)",
 		currBlog, post.Subj, post.PostTime, post.PostText)
 
 	return err
-}
+}*/
 
-type putRequest struct {
+/*type putRequest struct {
 	Name  string `json:"name"`
 	Title string `json:"title"`
-}
+}*/
 
 /*
 	curl.exe -vX PUT -H "Content-Type: application/json"  -d"@update.json" http://localhost:8080?id=1
 */
 
 // Put func
-func (c *BlogController) Put() {
+func (c *PostController) Put() {
 	id := c.Ctx.Request.URL.Query().Get("id")
 
 	if len(id) == 0 {
@@ -148,7 +112,7 @@ func (c *BlogController) Put() {
 		return
 	}
 
-	resp := new(putRequest)
+	resp := new(postRequest)
 
 	if err := readAndUnmarshall(resp, c.Ctx.Request.Body); err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(500)
@@ -156,12 +120,13 @@ func (c *BlogController) Put() {
 		return
 	}
 
-	blog := models.TBlog{
-		Name:  resp.Name,
-		Title: resp.Title,
+	post := models.TPost{
+		Subj:     resp.Subj,
+		PostTime: resp.PostTime,
+		PostText: resp.PostText,
 	}
 
-	if err := updateBlog(c.Db, id, blog.Name, blog.Title); err != nil {
+	if err := updatePost(c.Db, id, post.Subj, post.PostTime, post.PostText); err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(500)
 		_, _ = c.Ctx.ResponseWriter.Write([]byte(err.Error()))
 	}
@@ -170,13 +135,13 @@ func (c *BlogController) Put() {
 	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS`))
 }
 
-func updateBlog(db *sql.DB, id, name, title string) error {
-	if len(name) == 0 && len(title) == 0 {
+func updatePost(db *sql.DB, id, subj, posttime, posttext string) error {
+	if len(subj) == 0 && len(posttime) == 0 && len(posttime) == 0 {
 		return nil
 	}
 
-	_, err := db.Exec("UPDATE myblog.blogs SET name=?, title=? WHERE id=?",
-		name, title, id)
+	_, err := db.Exec("UPDATE myblog.posts SET subj=?, posttime=?, posttext=? WHERE id=?",
+		subj, posttime, posttext, id)
 
 	return err
 }
@@ -186,7 +151,7 @@ func updateBlog(db *sql.DB, id, name, title string) error {
 */
 
 // Delete func
-func (c *BlogController) Delete() {
+func (c *PostController) Delete() {
 	id := c.Ctx.Request.URL.Query().Get("id")
 
 	err := deletePost(c.Db, id)
@@ -200,7 +165,7 @@ func (c *BlogController) Delete() {
 	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS`))
 }
 
-func deletePost(db *sql.DB, id string) error {
+/*func deletePost(db *sql.DB, id string) error {
 	_, err := db.Exec("DELETE FROM myblog.posts WHERE `id`=?", id)
 
 	if err != nil {
@@ -208,4 +173,4 @@ func deletePost(db *sql.DB, id string) error {
 	}
 
 	return nil
-}
+}*/
