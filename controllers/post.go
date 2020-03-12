@@ -147,7 +147,7 @@ func updatePost(db *sql.DB, id, subj, posttime, posttext string) error {
 }
 
 /*
-	curl.exe -vX DELETE  http://localhost:8080?id=42
+	curl.exe -vX DELETE  http://localhost:8080/post?id=46
 */
 
 // Delete func
