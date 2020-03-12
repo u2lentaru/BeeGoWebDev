@@ -41,18 +41,13 @@ func getPost(db *sql.DB, blogid, id string) (models.TPost, error) {
 
 	row := db.QueryRow("select * from myblog.posts where posts.id = ?", id)
 	err := row.Scan(&post.ID, new(int), &post.Subj, &post.PostTime, &post.PostText)
+
 	if err != nil {
 		return models.TPost{}, err
 	}
 
 	return post, nil
 }
-
-/*type postRequest struct {
-	Subj     string `json:"subj"`
-	PostTime string `json:"posttime"`
-	PostText string `json:"posttext"`
-}*/
 
 /*
 	curl.exe -vX POST -H "Content-Type: application/json"  -d "@data.json" http://localhost:8080/post
@@ -85,18 +80,6 @@ func (c *PostController) Post() {
 	c.Ctx.ResponseWriter.WriteHeader(200)
 	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS\n`))
 }
-
-/*func createPost(db *sql.DB, currBlog string, post models.TPost) error {
-	_, err := db.Exec("insert into myblog.posts (blogid,subj,posttime,posttext) values (?,?,?,?)",
-		currBlog, post.Subj, post.PostTime, post.PostText)
-
-	return err
-}*/
-
-/*type putRequest struct {
-	Name  string `json:"name"`
-	Title string `json:"title"`
-}*/
 
 /*
 	curl.exe -vX PUT -H "Content-Type: application/json"  -d"@data.json" http://localhost:8080/post?id=46
@@ -133,6 +116,7 @@ func (c *PostController) Put() {
 
 	c.Ctx.ResponseWriter.WriteHeader(200)
 	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS`))
+
 }
 
 func updatePost(db *sql.DB, id, subj, posttime, posttext string) error {
@@ -163,14 +147,5 @@ func (c *PostController) Delete() {
 
 	c.Ctx.ResponseWriter.WriteHeader(200)
 	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS`))
+
 }
-
-/*func deletePost(db *sql.DB, id string) error {
-	_, err := db.Exec("DELETE FROM myblog.posts WHERE `id`=?", id)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}*/
