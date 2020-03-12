@@ -20,7 +20,6 @@ func init() {
 		log.Fatal(err)
 	}
 	//defer db.Close()
-	//serv := Server{database: db, currBlog: "1"}
 
 	if err := db.Ping(); err != nil {
 		log.Fatal(err)

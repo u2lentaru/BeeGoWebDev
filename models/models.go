@@ -5,7 +5,7 @@ type TPost struct {
 	ID       string
 	Subj     string
 	PostTime string
-	Text     string
+	PostText string
 }
 
 // TBlog - blog struct
