@@ -29,5 +29,13 @@ func init() {
 	beego.Router("/", &controllers.BlogController{
 		Controller: beego.Controller{},
 		Db:         db,
+		//currBlog:   "1",
 	})
+
+	beego.Router("/post", &controllers.PostController{
+		Controller: beego.Controller{},
+		Db:         db,
+		//currBlog:   "1",
+	})
+
 }

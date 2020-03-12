@@ -98,8 +98,6 @@ func (c *BlogController) Post() {
 		PostText: resp.PostText,
 	}
 
-	//log.Printf("post %v", post)
-
 	if err := createPost(c.Db, c.currBlog, post); err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(500)
 		_, _ = c.Ctx.ResponseWriter.Write([]byte(err.Error()))
