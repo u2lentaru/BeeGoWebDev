@@ -39,8 +39,8 @@ func (c *PostController) Get() {
 func getPost(db *sql.DB, blogid, id string) (models.TPost, error) {
 	post := models.TPost{}
 
-	row := db.QueryRow("select * from myblog.posts where blogs.id = ?", id)
-	err := row.Scan(&post.ID, &post.Subj, &post.PostTime, &post.PostText)
+	row := db.QueryRow("select * from myblog.posts where posts.id = ?", id)
+	err := row.Scan(&post.ID, new(int), &post.Subj, &post.PostTime, &post.PostText)
 	if err != nil {
 		return models.TPost{}, err
 	}
