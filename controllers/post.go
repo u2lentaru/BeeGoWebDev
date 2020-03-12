@@ -55,7 +55,7 @@ func getPost(db *sql.DB, blogid, id string) (models.TPost, error) {
 }*/
 
 /*
-	curl.exe -vX POST -H "Content-Type: application/json"  -d "@data.json" http://localhost:8080/
+	curl.exe -vX POST -H "Content-Type: application/json"  -d "@data.json" http://localhost:8080/post
 */
 
 // Post func
