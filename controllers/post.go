@@ -99,7 +99,7 @@ func (c *PostController) Post() {
 }*/
 
 /*
-	curl.exe -vX PUT -H "Content-Type: application/json"  -d"@update.json" http://localhost:8080?id=1
+	curl.exe -vX PUT -H "Content-Type: application/json"  -d"@data.json" http://localhost:8080/post?id=46
 */
 
 // Put func
