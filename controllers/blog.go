@@ -33,7 +33,6 @@ func (c *BlogController) Get() {
 
 func getBlog(db *sql.DB, id string) (models.TBlog, error) {
 	blog := models.TBlog{}
-	//blog := make(models.TBlog, 0, 1)
 	if err := db.Ping(); err != nil {
 		log.Fatal(err)
 	}
@@ -56,7 +55,6 @@ func getBlog(db *sql.DB, id string) (models.TBlog, error) {
 
 	for rows.Next() {
 		post := models.TPost{}
-		//post := make(models.TPost, 0, 1)
 
 		err := rows.Scan(&post.ID, new(int), &post.Subj, &post.PostTime, &post.PostText)
 		if err != nil {
