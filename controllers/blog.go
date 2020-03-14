@@ -23,7 +23,7 @@ func (c *BlogController) Get() {
 	c.currBlog = "1"
 	blog, err := getBlog(c.Db, c.currBlog)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return
 	}
 
@@ -34,17 +34,13 @@ func (c *BlogController) Get() {
 func getBlog(db *sql.DB, id string) (models.TBlog, error) {
 	blog := models.TBlog{}
 	if err := db.Ping(); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	row := db.QueryRow("select * from myblog.blogs where blogs.id = ?", id)
 	err := row.Scan(&blog.ID, &blog.Name, &blog.Title)
 	if err != nil {
 		return models.TBlog{}, err
-	}
-
-	if err := db.Ping(); err != nil {
-		log.Fatal(err)
 	}
 
 	rows, err := db.Query("select * from posts where blogid = ?", id)
@@ -177,6 +173,7 @@ func updateBlog(db *sql.DB, id, name, title string) error {
 		name, title, id)
 
 	return err
+
 }
 
 /*
@@ -196,12 +193,11 @@ func (c *BlogController) Delete() {
 
 	c.Ctx.ResponseWriter.WriteHeader(200)
 	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS`))
+
 }
 
 func deletePost(db *sql.DB, id string) error {
-	_, err := db.Exec("DELETE FROM myblog.posts WHERE `id`=?", id)
-
-	if err != nil {
+	if _, err := db.Exec("DELETE FROM myblog.posts WHERE `id`=?", id); err != nil {
 		return err
 	}
 

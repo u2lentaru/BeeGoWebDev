@@ -120,7 +120,7 @@ func (c *PostController) Put() {
 }
 
 func updatePost(db *sql.DB, id, subj, posttime, posttext string) error {
-	if len(subj) == 0 && len(posttime) == 0 && len(posttime) == 0 {
+	if len(subj) == 0 && len(posttime) == 0 && len(posttext) == 0 {
 		return nil
 	}
 
@@ -137,6 +137,12 @@ func updatePost(db *sql.DB, id, subj, posttime, posttext string) error {
 // Delete func
 func (c *PostController) Delete() {
 	id := c.Ctx.Request.URL.Query().Get("id")
+
+	if len(id) == 0 {
+		c.Ctx.ResponseWriter.WriteHeader(500)
+		_, _ = c.Ctx.ResponseWriter.Write([]byte("empty id"))
+		return
+	}
 
 	err := deletePost(c.Db, id)
 
