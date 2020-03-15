@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/astaxie/beego"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // PostController struct
@@ -13,6 +14,12 @@ type PostController struct {
 	beego.Controller
 	Db       *sql.DB
 	currBlog string
+}
+
+// Explorer struct
+type Explorer struct {
+	Db     *mongo.Client
+	DbName string
 }
 
 // Get func
