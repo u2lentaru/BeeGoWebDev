@@ -3,8 +3,10 @@ package controllers
 import (
 	"BeeGoWebDev/models"
 	"context"
+	"log"
 
 	"github.com/astaxie/beego"
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -68,10 +70,10 @@ func (e Explorer) addPost(post models.TPost) error {
 }
 
 // Get func
-/*func (c *BlogController) Get() {
+func (c *BlogController) Get() {
 	//c.currBlog = "1"
 	//blog, err := getBlog(c.Db, c.currBlog)
-	blog, err := getBlog(c.Explorer.Db)
+	blog, err := getBlog(c.Explorer)
 	if err != nil {
 		log.Println(err)
 		return
@@ -79,41 +81,27 @@ func (e Explorer) addPost(post models.TPost) error {
 
 	c.Data["Blog"] = blog
 	c.TplName = "blogs.tpl"
-}*/
+}
 
-/*//func getBlog(db *sql.DB, id string) (models.TBlog, error) {
-func getBlog(db *mongo.Client) (models.TBlog, error) {
-	blog := models.TBlog{}
-	//if err := db.Ping(); err != nil {
-	//	log.Println(err)
-	//}
+//func getBlog(db *sql.DB, id string) (models.TBlog, error) {
+func getBlog(e Explorer) ([]models.TPost, error) {
+	blog := []models.TPost{}
 
-	row := db.QueryRow("select * from myblog.blogs where blogs.id = ?", id)
-	err := row.Scan(&blog.ID, &blog.Name, &blog.Title)
+	c := e.Db.Database(e.DbName).Collection(e.DbCollection)
+
+	cur, err := c.Find(context.Background(), bson.D{})
 	if err != nil {
-		return models.TBlog{}, err
+		return nil, errors.Wrap(err, "Find")
 	}
 
-	rows, err := db.Query("select * from posts where blogid = ?", id)
-	if err != nil {
-		return models.TBlog{}, err
-	}
-	defer rows.Close()
+	//res := make([]models.Post, 0, 1)
 
-	for rows.Next() {
-		post := models.TPost{}
-
-		err := rows.Scan(&post.ID, new(int), &post.Subj, &post.PostTime, &post.PostText)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		blog.PostList = append(blog.PostList, post)
+	if err := cur.All(context.Background(), &blog); err != nil {
+		return nil, errors.Wrap(err, "All")
 	}
 
 	return blog, nil
-}*/
+}
 
 type postRequest struct {
 	Subj     string `json:"subj"`

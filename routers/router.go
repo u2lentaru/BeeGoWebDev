@@ -14,7 +14,7 @@ import (
 const (
 	//dsn = "root:qw12345@tcp(localhost:3306)/myblog?charset=utf8"
 	dbName         = "myblog"
-	collectionName = "blogs"
+	collectionName = "posts"
 )
 
 func init() {
