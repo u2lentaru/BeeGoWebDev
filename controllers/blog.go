@@ -2,26 +2,76 @@ package controllers
 
 import (
 	"BeeGoWebDev/models"
-	"database/sql"
-	"encoding/json"
-	"io"
-	"io/ioutil"
-	"log"
+	"context"
 
 	"github.com/astaxie/beego"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // BlogController struct
 type BlogController struct {
 	beego.Controller
-	Db       *sql.DB
-	currBlog string
+	//Db       *sql.DB
+	//currBlog string
+	Explorer Explorer
+}
+
+// Explorer struct
+type Explorer struct {
+	Db           *mongo.Client
+	DbName       string
+	DbCollection string
+}
+
+// Truncate - truncate database
+func (e Explorer) Truncate() error {
+	c := e.Db.Database(e.DbName).Collection(e.DbCollection)
+	_, err := c.DeleteMany(context.Background(), bson.D{})
+
+	return err
+}
+
+// InsertDefault - create posts
+func (e Explorer) InsertDefault() error {
+	for _, post := range createPosts() {
+		if err := e.addPost(post); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func createPosts() []models.TPost {
+	return []models.TPost{
+		{
+			ID:       "1",
+			Subj:     "1st subj",
+			PostTime: "2020-01-01",
+			PostText: "1st text",
+		},
+		{
+			ID:       "2",
+			Subj:     "2nd subj",
+			PostTime: "2020-01-02",
+			PostText: "2nd text",
+		},
+	}
+}
+
+func (e Explorer) addPost(post models.TPost) error {
+	c := e.Db.Database(e.DbName).Collection(e.DbCollection)
+	_, err := c.InsertOne(context.Background(), post)
+
+	return err
 }
 
 // Get func
-func (c *BlogController) Get() {
-	c.currBlog = "1"
-	blog, err := getBlog(c.Db, c.currBlog)
+/*func (c *BlogController) Get() {
+	//c.currBlog = "1"
+	//blog, err := getBlog(c.Db, c.currBlog)
+	blog, err := getBlog(c.Explorer.Db)
 	if err != nil {
 		log.Println(err)
 		return
@@ -29,13 +79,14 @@ func (c *BlogController) Get() {
 
 	c.Data["Blog"] = blog
 	c.TplName = "blogs.tpl"
-}
+}*/
 
-func getBlog(db *sql.DB, id string) (models.TBlog, error) {
+/*//func getBlog(db *sql.DB, id string) (models.TBlog, error) {
+func getBlog(db *mongo.Client) (models.TBlog, error) {
 	blog := models.TBlog{}
-	if err := db.Ping(); err != nil {
-		log.Println(err)
-	}
+	//if err := db.Ping(); err != nil {
+	//	log.Println(err)
+	//}
 
 	row := db.QueryRow("select * from myblog.blogs where blogs.id = ?", id)
 	err := row.Scan(&blog.ID, &blog.Name, &blog.Title)
@@ -62,7 +113,7 @@ func getBlog(db *sql.DB, id string) (models.TBlog, error) {
 	}
 
 	return blog, nil
-}
+}*/
 
 type postRequest struct {
 	Subj     string `json:"subj"`
@@ -75,7 +126,7 @@ type postRequest struct {
 */
 
 // Post func
-func (c *BlogController) Post() {
+/*func (c *BlogController) Post() {
 	c.currBlog = "1"
 
 	resp := new(postRequest)
@@ -121,7 +172,7 @@ func createPost(db *sql.DB, currBlog string, post models.TPost) error {
 		currBlog, post.Subj, post.PostTime, post.PostText)
 
 	return err
-}
+}*/
 
 type putRequest struct {
 	Name  string `json:"name"`
@@ -133,7 +184,7 @@ type putRequest struct {
 */
 
 // Put func
-func (c *BlogController) Put() {
+/*func (c *BlogController) Put() {
 	id := c.Ctx.Request.URL.Query().Get("id")
 
 	if len(id) == 0 {
@@ -174,14 +225,14 @@ func updateBlog(db *sql.DB, id, name, title string) error {
 
 	return err
 
-}
+}*/
 
 /*
 	curl.exe -vX DELETE  http://localhost:8080?id=42
 */
 
 // Delete func
-func (c *BlogController) Delete() {
+/*func (c *BlogController) Delete() {
 	id := c.Ctx.Request.URL.Query().Get("id")
 
 	err := deletePost(c.Db, id)
@@ -203,3 +254,4 @@ func deletePost(db *sql.DB, id string) error {
 
 	return nil
 }
+*/

@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"BeeGoWebDev/controllers"
 	"context"
 	"log"
 
@@ -35,6 +36,16 @@ func init() {
 		DbName:       dbName,
 		DbCollection: collectionName,
 	}
+
+	if err := e.Truncate(); err != nil {
+		log.Fatal(err)
+	}
+	log.Print("truncated")
+
+	if err := e.InsertDefault(); err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Inserted default")
 
 	beego.Router("/", &controllers.BlogController{
 		Explorer: e,

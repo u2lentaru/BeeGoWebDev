@@ -1,12 +1,9 @@
 package controllers
 
 import (
-	"BeeGoWebDev/models"
 	"database/sql"
-	"log"
 
 	"github.com/astaxie/beego"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // PostController struct
@@ -16,12 +13,7 @@ type PostController struct {
 	currBlog string
 }
 
-// Explorer struct
-type Explorer struct {
-	Db     *mongo.Client
-	DbName string
-}
-
+/*
 // Get func
 func (c *PostController) Get() {
 	c.currBlog = "1"
@@ -61,7 +53,7 @@ func getPost(db *sql.DB, blogid, id string) (models.TPost, error) {
 */
 
 // Post func
-func (c *PostController) Post() {
+/*func (c *PostController) Post() {
 	c.currBlog = "1"
 
 	resp := new(postRequest)
@@ -86,14 +78,14 @@ func (c *PostController) Post() {
 
 	c.Ctx.ResponseWriter.WriteHeader(200)
 	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS\n`))
-}
+}*/
 
 /*
 	curl.exe -vX PUT -H "Content-Type: application/json"  -d"@data.json" http://localhost:8080/post?id=46
 */
 
 // Put func
-func (c *PostController) Put() {
+/*func (c *PostController) Put() {
 	id := c.Ctx.Request.URL.Query().Get("id")
 
 	if len(id) == 0 {
@@ -135,14 +127,14 @@ func updatePost(db *sql.DB, id, subj, posttime, posttext string) error {
 		subj, posttime, posttext, id)
 
 	return err
-}
+}*/
 
 /*
 	curl.exe -vX DELETE  http://localhost:8080/post?id=46
 */
 
 // Delete func
-func (c *PostController) Delete() {
+/*func (c *PostController) Delete() {
 	id := c.Ctx.Request.URL.Query().Get("id")
 
 	if len(id) == 0 {
@@ -161,4 +153,4 @@ func (c *PostController) Delete() {
 	c.Ctx.ResponseWriter.WriteHeader(200)
 	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS`))
 
-}
+}*/
