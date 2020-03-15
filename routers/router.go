@@ -19,7 +19,8 @@ const (
 
 func init() {
 	//db, err := sql.Open("mysql", dsn)
-	db, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+	//db, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+	db, err := mongo.NewClient(options.Client().ApplyURI("mongodb://192.168.0.102:27017"))
 	if err != nil {
 		log.Fatal(err)
 	}
