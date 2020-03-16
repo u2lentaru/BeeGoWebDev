@@ -206,8 +206,8 @@ func (c *BlogController) Put() {
 		PostText: resp.PostText,
 	}
 
-	log.Printf("id %v", id)
-	log.Printf("post %v", post)
+	//log.Printf("id %v", id)
+	//log.Printf("post %v", post)
 	//if err := updateBlog(c.Db, id, blog.Name, blog.Title); err != nil {
 	if err := c.Explorer.editPost(&post, id); err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(500)
@@ -259,14 +259,21 @@ func createUpdates(post models.TPost) bson.D {
 }
 
 /*
-	curl.exe -vX DELETE  http://localhost:8080?id=42
+	curl.exe -vX DELETE  http://localhost:8080?id=2
 */
 
 // Delete func
-/*func (c *BlogController) Delete() {
+func (c *BlogController) Delete() {
 	id := c.Ctx.Request.URL.Query().Get("id")
 
-	err := deletePost(c.Db, id)
+	if len(id) == 0 {
+		c.Ctx.ResponseWriter.WriteHeader(500)
+		_, _ = c.Ctx.ResponseWriter.Write([]byte("empty id"))
+		return
+	}
+
+	//err := deletePost(c.Db, id)
+	err := c.Explorer.deletePost(id)
 
 	if err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(500)
@@ -278,7 +285,7 @@ func createUpdates(post models.TPost) bson.D {
 
 }
 
-func deletePost(db *sql.DB, id string) error {
+/*func deletePost(db *sql.DB, id string) error {
 	if _, err := db.Exec("DELETE FROM myblog.posts WHERE `id`=?", id); err != nil {
 		return err
 	}
@@ -286,3 +293,12 @@ func deletePost(db *sql.DB, id string) error {
 	return nil
 }
 */
+
+func (e Explorer) deletePost(id string) error {
+	filter := bson.D{{Key: "id", Value: id}}
+
+	c := e.Db.Database(e.DbName).Collection(e.DbCollection)
+	_, err := c.DeleteOne(context.Background(), filter)
+
+	return err
+}
