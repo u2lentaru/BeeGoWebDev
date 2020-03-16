@@ -73,8 +73,8 @@ func (e Explorer) getPost(id string) (models.TPost, error) {
 */
 
 // Post func
-/*func (c *PostController) Post() {
-	c.currBlog = "1"
+func (c *PostController) Post() {
+	//c.currBlog = "1"
 
 	resp := new(postRequest)
 
@@ -85,12 +85,14 @@ func (e Explorer) getPost(id string) (models.TPost, error) {
 	}
 
 	post := models.TPost{
+		ID:       resp.ID,
 		Subj:     resp.Subj,
 		PostTime: resp.PostTime,
 		PostText: resp.PostText,
 	}
 
-	if err := createPost(c.Db, c.currBlog, post); err != nil {
+	//if err := createPost(c.Db, c.currBlog, post); err != nil {
+	if err := c.Explorer.addPost(post); err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(500)
 		_, _ = c.Ctx.ResponseWriter.Write([]byte(err.Error()))
 		return
@@ -98,7 +100,7 @@ func (e Explorer) getPost(id string) (models.TPost, error) {
 
 	c.Ctx.ResponseWriter.WriteHeader(200)
 	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS\n`))
-}*/
+}
 
 /*
 	curl.exe -vX PUT -H "Content-Type: application/json"  -d"@data.json" http://localhost:8080/post?id=46

@@ -107,6 +107,7 @@ func (e Explorer) getBlog() ([]models.TPost, error) {
 }
 
 type postRequest struct {
+	ID       string `json:"id"`
 	Subj     string `json:"subj"`
 	PostTime string `json:"posttime"`
 	PostText string `json:"posttext"`
@@ -129,6 +130,7 @@ func (c *BlogController) Post() {
 	}
 
 	post := models.TPost{
+		ID:       resp.ID,
 		Subj:     resp.Subj,
 		PostTime: resp.PostTime,
 		PostText: resp.PostText,
