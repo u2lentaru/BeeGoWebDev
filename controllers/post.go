@@ -107,7 +107,7 @@ func (c *PostController) Post() {
 */
 
 // Put func
-/*func (c *PostController) Put() {
+func (c *PostController) Put() {
 	id := c.Ctx.Request.URL.Query().Get("id")
 
 	if len(id) == 0 {
@@ -130,7 +130,8 @@ func (c *PostController) Post() {
 		PostText: resp.PostText,
 	}
 
-	if err := updatePost(c.Db, id, post.Subj, post.PostTime, post.PostText); err != nil {
+	//if err := updatePost(c.Db, id, post.Subj, post.PostTime, post.PostText); err != nil {
+	if err := c.Explorer.editPost(&post, id); err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(500)
 		_, _ = c.Ctx.ResponseWriter.Write([]byte(err.Error()))
 	}
@@ -140,7 +141,7 @@ func (c *PostController) Post() {
 
 }
 
-func updatePost(db *sql.DB, id, subj, posttime, posttext string) error {
+/*func updatePost(db *sql.DB, id, subj, posttime, posttext string) error {
 	if len(subj) == 0 && len(posttime) == 0 && len(posttext) == 0 {
 		return nil
 	}
