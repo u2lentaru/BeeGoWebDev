@@ -17,8 +17,6 @@ import (
 // BlogController struct
 type BlogController struct {
 	beego.Controller
-	//Db       *sql.DB
-	//currBlog string
 	Explorer Explorer
 }
 
@@ -62,6 +60,12 @@ func createPosts() []models.TPost {
 			PostTime: "2020-01-02",
 			PostText: "2nd text",
 		},
+		{
+			ID:       "3",
+			Subj:     "3rd subj",
+			PostTime: "2020-01-03",
+			PostText: "3rd text",
+		},
 	}
 }
 
@@ -74,8 +78,6 @@ func (e Explorer) addPost(post models.TPost) error {
 
 // Get func
 func (c *BlogController) Get() {
-	//c.currBlog = "1"
-	//blog, err := getBlog(c.Db, c.currBlog)
 	blog, err := c.Explorer.getBlog()
 	if err != nil {
 		log.Println(err)
@@ -97,8 +99,6 @@ func (e Explorer) getBlog() ([]models.TPost, error) {
 		return nil, errors.Wrap(err, "Find")
 	}
 
-	//res := make([]models.Post, 0, 1)
-
 	if err := cur.All(context.Background(), &blog); err != nil {
 		return nil, errors.Wrap(err, "All")
 	}
@@ -119,8 +119,6 @@ type postRequest struct {
 
 // Post func
 func (c *BlogController) Post() {
-	//c.currBlog = "1"
-
 	resp := new(postRequest)
 
 	if err := readAndUnmarshall(resp, c.Ctx.Request.Body); err != nil {
@@ -136,9 +134,6 @@ func (c *BlogController) Post() {
 		PostText: resp.PostText,
 	}
 
-	//log.Printf("post %v", post)
-
-	//if err := createPost(c.Db, c.currBlog, post); err != nil {
 	if err := c.Explorer.addPost(post); err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(500)
 		_, _ = c.Ctx.ResponseWriter.Write([]byte(err.Error()))
@@ -161,18 +156,6 @@ func readAndUnmarshall(resp interface{}, body io.ReadCloser) error {
 	return nil
 }
 
-/*func createPost(db *sql.DB, currBlog string, post models.TPost) error {
-	_, err := db.Exec("insert into myblog.posts (blogid,subj,posttime,posttext) values (?,?,?,?)",
-		currBlog, post.Subj, post.PostTime, post.PostText)
-
-	return err
-}*/
-
-type putRequest struct {
-	Name  string `json:"name"`
-	Title string `json:"title"`
-}
-
 /*
 	curl.exe -vX PUT -H "Content-Type: application/json"  -d"@update.json" http://localhost:8080?id=1
 */
@@ -187,9 +170,7 @@ func (c *BlogController) Put() {
 		return
 	}
 
-	//resp := new(putRequest)
 	resp := new(postRequest)
-	//resp := new(models.TPost)
 
 	if err := readAndUnmarshall(resp, c.Ctx.Request.Body); err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(500)
@@ -197,20 +178,12 @@ func (c *BlogController) Put() {
 		return
 	}
 
-	/*blog := models.TBlog{
-		Name:  resp.Name,
-		Title: resp.Title,
-	}*/
-
 	post := models.TPost{
 		Subj:     resp.Subj,
 		PostTime: resp.PostTime,
 		PostText: resp.PostText,
 	}
 
-	//log.Printf("id %v", id)
-	//log.Printf("post %v", post)
-	//if err := updateBlog(c.Db, id, blog.Name, blog.Title); err != nil {
 	if err := c.Explorer.editPost(&post, id); err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(500)
 		_, _ = c.Ctx.ResponseWriter.Write([]byte(err.Error()))
@@ -219,18 +192,6 @@ func (c *BlogController) Put() {
 	c.Ctx.ResponseWriter.WriteHeader(200)
 	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS`))
 }
-
-/*func updateBlog(db *sql.DB, id, name, title string) error {
-	if len(name) == 0 && len(title) == 0 {
-		return nil
-	}
-
-	_, err := db.Exec("UPDATE myblog.blogs SET name=?, title=? WHERE id=?",
-		name, title, id)
-
-	return err
-
-}*/
 
 func (e Explorer) editPost(post *models.TPost, id string) error {
 	filter := bson.D{{Key: "id", Value: id}}
@@ -258,6 +219,7 @@ func createUpdates(post models.TPost) bson.D {
 	}
 
 	return bson.D{{Key: "$set", Value: update}}
+
 }
 
 /*
@@ -274,7 +236,6 @@ func (c *BlogController) Delete() {
 		return
 	}
 
-	//err := deletePost(c.Db, id)
 	err := c.Explorer.deletePost(id)
 
 	if err != nil {
@@ -287,15 +248,6 @@ func (c *BlogController) Delete() {
 
 }
 
-/*func deletePost(db *sql.DB, id string) error {
-	if _, err := db.Exec("DELETE FROM myblog.posts WHERE `id`=?", id); err != nil {
-		return err
-	}
-
-	return nil
-}
-*/
-
 func (e Explorer) deletePost(id string) error {
 	filter := bson.D{{Key: "id", Value: id}}
 
@@ -303,4 +255,5 @@ func (e Explorer) deletePost(id string) error {
 	_, err := c.DeleteOne(context.Background(), filter)
 
 	return err
+
 }

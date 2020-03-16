@@ -57,9 +57,4 @@ func init() {
 		Explorer: e,
 	})
 
-	/*beego.Router("/post", &controllers.PostController{
-		Controller: beego.Controller{},
-		Db:         db,
-		//currBlog:   "1",
-	})*/
 }
