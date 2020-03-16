@@ -176,7 +176,7 @@ type putRequest struct {
 */
 
 // Put func
-/*func (c *BlogController) Put() {
+func (c *BlogController) Put() {
 	id := c.Ctx.Request.URL.Query().Get("id")
 
 	if len(id) == 0 {
@@ -185,7 +185,9 @@ type putRequest struct {
 		return
 	}
 
-	resp := new(putRequest)
+	//resp := new(putRequest)
+	resp := new(postRequest)
+	//resp := new(models.TPost)
 
 	if err := readAndUnmarshall(resp, c.Ctx.Request.Body); err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(500)
@@ -193,12 +195,21 @@ type putRequest struct {
 		return
 	}
 
-	blog := models.TBlog{
+	/*blog := models.TBlog{
 		Name:  resp.Name,
 		Title: resp.Title,
+	}*/
+
+	post := models.TPost{
+		Subj:     resp.Subj,
+		PostTime: resp.PostTime,
+		PostText: resp.PostText,
 	}
 
-	if err := updateBlog(c.Db, id, blog.Name, blog.Title); err != nil {
+	log.Printf("id %v", id)
+	log.Printf("post %v", post)
+	//if err := updateBlog(c.Db, id, blog.Name, blog.Title); err != nil {
+	if err := c.Explorer.editPost(&post, id); err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(500)
 		_, _ = c.Ctx.ResponseWriter.Write([]byte(err.Error()))
 	}
@@ -207,7 +218,7 @@ type putRequest struct {
 	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS`))
 }
 
-func updateBlog(db *sql.DB, id, name, title string) error {
+/*func updateBlog(db *sql.DB, id, name, title string) error {
 	if len(name) == 0 && len(title) == 0 {
 		return nil
 	}
@@ -218,6 +229,34 @@ func updateBlog(db *sql.DB, id, name, title string) error {
 	return err
 
 }*/
+
+func (e Explorer) editPost(post *models.TPost, id string) error {
+	filter := bson.D{{Key: "id", Value: id}}
+
+	update := createUpdates(*post)
+
+	c := e.Db.Database(e.DbName).Collection(e.DbCollection)
+	_, err := c.UpdateOne(context.Background(), filter, update)
+
+	return err
+}
+
+func createUpdates(post models.TPost) bson.D {
+	update := bson.D{}
+	if len(post.Subj) != 0 {
+		update = append(update, bson.E{Key: "Subj", Value: post.Subj})
+	}
+
+	if len(post.PostTime) != 0 {
+		update = append(update, bson.E{Key: "PostTime", Value: post.PostTime})
+	}
+
+	if len(post.PostText) != 0 {
+		update = append(update, bson.E{Key: "PostText", Value: post.PostText})
+	}
+
+	return bson.D{{"$set", update}}
+}
 
 /*
 	curl.exe -vX DELETE  http://localhost:8080?id=42
