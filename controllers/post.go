@@ -1,22 +1,26 @@
 package controllers
 
 import (
-	"database/sql"
+	"BeeGoWebDev/models"
+	"context"
+	"log"
 
 	"github.com/astaxie/beego"
+	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 // PostController struct
 type PostController struct {
 	beego.Controller
-	Db       *sql.DB
-	currBlog string
+	//Db       *sql.DB
+	//currBlog string
+	Explorer Explorer
 }
 
-/*
 // Get func
 func (c *PostController) Get() {
-	c.currBlog = "1"
+	//c.currBlog = "1"
 	id := c.Ctx.Request.URL.Query().Get("id")
 
 	if len(id) == 0 {
@@ -25,7 +29,8 @@ func (c *PostController) Get() {
 		return
 	}
 
-	post, err := getPost(c.Db, c.currBlog, id)
+	//post, err := getPost(c.Db, c.currBlog, id)
+	post, err := c.Explorer.getPost(id)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -35,7 +40,22 @@ func (c *PostController) Get() {
 	c.TplName = "post.tpl"
 }
 
-func getPost(db *sql.DB, blogid, id string) (models.TPost, error) {
+func (e Explorer) getPost(id string) (models.TPost, error) {
+	c := e.Db.Database(e.DbName).Collection(e.DbCollection)
+
+	filter := bson.D{{Key: "id", Value: id}}
+
+	res := c.FindOne(context.Background(), filter)
+
+	post := new(models.TPost)
+	if err := res.Decode(post); err != nil {
+		return models.TPost{}, errors.Wrap(err, "decode")
+	}
+
+	return *post, nil
+}
+
+/*func getPost(db *sql.DB, blogid, id string) (models.TPost, error) {
 	post := models.TPost{}
 
 	row := db.QueryRow("select * from myblog.posts where posts.id = ?", id)
