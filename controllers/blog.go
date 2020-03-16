@@ -3,6 +3,9 @@ package controllers
 import (
 	"BeeGoWebDev/models"
 	"context"
+	"encoding/json"
+	"io"
+	"io/ioutil"
 	"log"
 
 	"github.com/astaxie/beego"
@@ -73,7 +76,7 @@ func (e Explorer) addPost(post models.TPost) error {
 func (c *BlogController) Get() {
 	//c.currBlog = "1"
 	//blog, err := getBlog(c.Db, c.currBlog)
-	blog, err := getBlog(c.Explorer)
+	blog, err := c.Explorer.getBlog()
 	if err != nil {
 		log.Println(err)
 		return
@@ -84,7 +87,7 @@ func (c *BlogController) Get() {
 }
 
 //func getBlog(db *sql.DB, id string) (models.TBlog, error) {
-func getBlog(e Explorer) ([]models.TPost, error) {
+func (e Explorer) getBlog() ([]models.TPost, error) {
 	blog := []models.TPost{}
 
 	c := e.Db.Database(e.DbName).Collection(e.DbCollection)
@@ -114,8 +117,8 @@ type postRequest struct {
 */
 
 // Post func
-/*func (c *BlogController) Post() {
-	c.currBlog = "1"
+func (c *BlogController) Post() {
+	//c.currBlog = "1"
 
 	resp := new(postRequest)
 
@@ -133,7 +136,8 @@ type postRequest struct {
 
 	//log.Printf("post %v", post)
 
-	if err := createPost(c.Db, c.currBlog, post); err != nil {
+	//if err := createPost(c.Db, c.currBlog, post); err != nil {
+	if err := c.Explorer.addPost(post); err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(500)
 		_, _ = c.Ctx.ResponseWriter.Write([]byte(err.Error()))
 		return
@@ -155,7 +159,7 @@ func readAndUnmarshall(resp interface{}, body io.ReadCloser) error {
 	return nil
 }
 
-func createPost(db *sql.DB, currBlog string, post models.TPost) error {
+/*func createPost(db *sql.DB, currBlog string, post models.TPost) error {
 	_, err := db.Exec("insert into myblog.posts (blogid,subj,posttime,posttext) values (?,?,?,?)",
 		currBlog, post.Subj, post.PostTime, post.PostText)
 
