@@ -157,7 +157,7 @@ func (c *PostController) Put() {
 */
 
 // Delete func
-/*func (c *PostController) Delete() {
+func (c *PostController) Delete() {
 	id := c.Ctx.Request.URL.Query().Get("id")
 
 	if len(id) == 0 {
@@ -166,7 +166,8 @@ func (c *PostController) Put() {
 		return
 	}
 
-	err := deletePost(c.Db, id)
+	//err := deletePost(c.Db, id)
+	err := c.Explorer.deletePost(id)
 
 	if err != nil {
 		c.Ctx.ResponseWriter.WriteHeader(500)
@@ -176,4 +177,4 @@ func (c *PostController) Put() {
 	c.Ctx.ResponseWriter.WriteHeader(200)
 	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS`))
 
-}*/
+}

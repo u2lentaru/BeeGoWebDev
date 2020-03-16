@@ -257,7 +257,7 @@ func createUpdates(post models.TPost) bson.D {
 		update = append(update, bson.E{Key: "PostText", Value: post.PostText})
 	}
 
-	return bson.D{{"$set", update}}
+	return bson.D{{Key: "$set", Value: update}}
 }
 
 /*
