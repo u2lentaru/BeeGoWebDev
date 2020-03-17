@@ -1,36 +1,56 @@
 package controllers
 
 import (
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"path/filepath"
-	"runtime"
 	"testing"
-
-	"github.com/astaxie/beego"
-	. "github.com/smartystreets/goconvey/convey"
 )
 
-func init() {
-	_, file, _, _ := runtime.Caller(0)
-	apppath, _ := filepath.Abs(filepath.Dir(filepath.Join(file, ".."+string(filepath.Separator))))
-	beego.TestBeegoInit(apppath)
+type TestCase struct {
+	ID         string
+	Response   string
+	StatusCode int
 }
 
-// TestGet is a sample to run an endpoint test
 func TestGet(t *testing.T) {
-	r, _ := http.NewRequest("GET", "/v1/object", nil)
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
+	for caseNum, item := range createCases() {
+		url := "http://localhost/post?id=" + item.ID
+		req := httptest.NewRequest("GET", url, nil)
+		w := httptest.NewRecorder()
 
-	beego.Trace("testing", "TestGet", "Code[%d]\n%s", w.Code, w.Body.String())
+		Get(w, req)
 
-	Convey("Subject: Test Station Endpoint\n", t, func() {
-		Convey("Status Code Should Be 200", func() {
-			So(w.Code, ShouldEqual, 200)
-		})
-		Convey("The Result Should Not Be Empty", func() {
-			So(w.Body.Len(), ShouldBeGreaterThan, 0)
-		})
-	})
+		if w.Code != item.StatusCode {
+			t.Errorf("[%d] wrong StatusCode: got %d, expected %d",
+				caseNum, w.Code, item.StatusCode)
+		}
+
+		resp := w.Result()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			t.Error(err)
+		}
+
+		bodyStr := string(body)
+		if bodyStr != item.Response {
+			t.Errorf("[%d] wrong Response: got %+v, expected %+v",
+				caseNum, bodyStr, item.Response)
+		}
+	}
+}
+
+func createCases() []TestCase {
+	return []TestCase{
+		{
+			ID:         "42",
+			Response:   `{"status": 200, "resp": {"user": 42}}`,
+			StatusCode: http.StatusOK,
+		},
+		{
+			ID:         "500",
+			Response:   `{"status": 500, "err": "db_error"}`,
+			StatusCode: http.StatusInternalServerError,
+		},
+	}
 }

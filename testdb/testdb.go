@@ -16,7 +16,7 @@ func TestaddPost(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	e := explorer{
+	e := texplorer{
 		Db:           db,
 		DbName:       "myblog",
 		DbCollection: "posts",
