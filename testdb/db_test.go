@@ -4,6 +4,7 @@ import (
 	"BeeGoWebDev/models"
 	"context"
 	"log"
+	"reflect"
 	"testing"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -11,24 +12,19 @@ import (
 )
 
 // TExplorer - Explorer for tests
-type TExplorer struct {
+/*type TExplorer struct {
 	Db           *mongo.Client
 	DbName       string
 	DbCollection string
-}
+}*/
 
 // TestaddPost add post
-func TestaddPost(t *testing.T) {
+func TestAddPost(t *testing.T) {
 	/*db, err := mongo.NewClient(options.Client().ApplyURI("mongodb://192.168.0.103:27017"))
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	e := TExplorer{
-		Db:           db,
-		DbName:       "myblog",
-		DbCollection: "posts",
-	}*/
+	*/
 
 	e, err := initDb()
 	if err != nil {
@@ -47,8 +43,20 @@ func TestaddPost(t *testing.T) {
 		PostText: "NewPostText",
 	}
 
+	initialState := createPosts()
+
 	if err := e.addPost(post); err != nil {
 		t.Error(err)
+	}
+
+	resultPosts, err := e.getBlog()
+
+	if err := e.addPost(post); err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(resultPosts, initialState) {
+		t.Errorf("Expected %v, result %v", initialState, resultPosts)
 	}
 }
 
