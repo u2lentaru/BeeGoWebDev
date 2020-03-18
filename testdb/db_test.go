@@ -55,13 +55,15 @@ func TestAddPost(t *testing.T) {
 		t.Error(err)
 	}
 
-	if !reflect.DeepEqual(resultPosts, initialState) {
+	newPosts := append(initialState, post)
+	//if !reflect.DeepEqual(resultPosts, initialState) {
+	if !reflect.DeepEqual(resultPosts, newPosts) {
 		t.Errorf("Expected %v, result %v", initialState, resultPosts)
 	}
 }
 
 func initDb() (TExplorer, error) {
-	db, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+	db, err := mongo.NewClient(options.Client().ApplyURI("mongodb://192.168.0.103:27017"))
 	if err != nil {
 		return TExplorer{}, err
 	}
@@ -69,13 +71,15 @@ func initDb() (TExplorer, error) {
 	if err = db.Connect(context.Background()); err != nil {
 		return TExplorer{}, err
 	}
-	log.Print("mongo connected")
+	log.Print("Connected")
 
 	e := TExplorer{
 		Db:           db,
-		DbName:       "habr",
-		DbCollection: "test_collection",
+		DbName:       "myblog",
+		DbCollection: "posts",
 	}
+
+	log.Printf("e %v", e)
 
 	if err := e.InsertDefault(); err != nil {
 		return TExplorer{}, err
