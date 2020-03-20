@@ -15,11 +15,11 @@ type TestCase struct {
 
 func TestGet(t *testing.T) {
 	for caseNum, item := range createCases() {
-		//url := "http://localhost/post?id=" + item.ID
-		//req := httptest.NewRequest("GET", url, nil)
+		url := "http://localhost/post?id=" + item.ID
+		req := httptest.NewRequest("GET", url, nil)
 		w := httptest.NewRecorder()
 
-		//Get(w, req)
+		GetPost3(w, req)
 
 		if w.Code != item.StatusCode {
 			t.Errorf("[%d] wrong StatusCode: got %d, expected %d",
@@ -43,8 +43,8 @@ func TestGet(t *testing.T) {
 func createCases() []TestCase {
 	return []TestCase{
 		{
-			ID:         "42",
-			Response:   `{"status": 200, "resp": {"user": 42}}`,
+			ID:         "3",
+			Response:   `{"status": 200, "resp": {"post": 3}}`,
 			StatusCode: http.StatusOK,
 		},
 		{
