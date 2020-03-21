@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-// GetPost3 gep post id=3
+// GetPost3 get post id=3
 func GetPost3(w http.ResponseWriter, r *http.Request) {
 	key := r.FormValue("id")
 	if key == "3" {
