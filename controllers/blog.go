@@ -35,7 +35,7 @@ func (e Explorer) Truncate() error {
 	return err
 }
 
-// InsertDefault - create posts
+// InsertDefault - create posts. Cyclomatic complexity 3
 func (e Explorer) InsertDefault() error {
 	for _, post := range createPosts() {
 		if err := e.addPost(post); err != nil {
@@ -46,6 +46,7 @@ func (e Explorer) InsertDefault() error {
 	return nil
 }
 
+// createPosts. Cyclomatic complexity 1
 func createPosts() []models.TPost {
 	return []models.TPost{
 		{
@@ -69,6 +70,7 @@ func createPosts() []models.TPost {
 	}
 }
 
+// addPost. Cyclomatic complexity 1
 func (e Explorer) addPost(post models.TPost) error {
 	c := e.Db.Database(e.DbName).Collection(e.DbCollection)
 	_, err := c.InsertOne(context.Background(), post)
@@ -76,7 +78,7 @@ func (e Explorer) addPost(post models.TPost) error {
 	return err
 }
 
-// Get func
+// Get func. Cyclomatic complexity 2
 func (c *BlogController) Get() {
 	blog, err := c.Explorer.getBlog()
 	if err != nil {
@@ -88,7 +90,7 @@ func (c *BlogController) Get() {
 	c.TplName = "blogs.tpl"
 }
 
-//func getBlog(db *sql.DB, id string) (models.TBlog, error) {
+// getBlog. Cyclomatic complexity 3
 func (e Explorer) getBlog() ([]models.TPost, error) {
 	blog := []models.TPost{}
 
@@ -117,7 +119,7 @@ type postRequest struct {
 	curl.exe -vX POST -H "Content-Type: application/json"  -d "@data.json" http://localhost:8080/
 */
 
-// Post func
+// Post func. Cyclomatic complexity 3
 func (c *BlogController) Post() {
 	resp := new(postRequest)
 
@@ -144,6 +146,7 @@ func (c *BlogController) Post() {
 	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS\n`))
 }
 
+// readAndUnmarshall. Cyclomatic complexity 3
 func readAndUnmarshall(resp interface{}, body io.ReadCloser) error {
 	bytes, err := ioutil.ReadAll(body)
 	if err != nil {
@@ -160,7 +163,7 @@ func readAndUnmarshall(resp interface{}, body io.ReadCloser) error {
 	curl.exe -vX PUT -H "Content-Type: application/json"  -d"@update.json" http://localhost:8080?id=1
 */
 
-// Put func
+// Put func. Cyclomatic complexity 4
 func (c *BlogController) Put() {
 	id := c.Ctx.Request.URL.Query().Get("id")
 
@@ -193,6 +196,7 @@ func (c *BlogController) Put() {
 	_, _ = c.Ctx.ResponseWriter.Write([]byte(`SUCCESS`))
 }
 
+// editPost. Cyclomatic complexity 1
 func (e Explorer) editPost(post *models.TPost, id string) error {
 	filter := bson.D{{Key: "id", Value: id}}
 
@@ -204,6 +208,7 @@ func (e Explorer) editPost(post *models.TPost, id string) error {
 	return err
 }
 
+// createUpdates. Cyclomatic complexity 4
 func createUpdates(post models.TPost) bson.D {
 	update := bson.D{}
 	if len(post.Subj) != 0 {
@@ -226,7 +231,7 @@ func createUpdates(post models.TPost) bson.D {
 	curl.exe -vX DELETE  http://localhost:8080?id=2
 */
 
-// Delete func
+// Delete func. Cyclomatic complexity 3
 func (c *BlogController) Delete() {
 	id := c.Ctx.Request.URL.Query().Get("id")
 
@@ -248,6 +253,7 @@ func (c *BlogController) Delete() {
 
 }
 
+// deletePost. Cyclomatic complexity 1
 func (e Explorer) deletePost(id string) error {
 	filter := bson.D{{Key: "id", Value: id}}
 
