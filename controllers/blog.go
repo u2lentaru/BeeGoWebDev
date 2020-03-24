@@ -27,7 +27,7 @@ type Explorer struct {
 	DbCollection string
 }
 
-// Truncate - truncate database
+// Truncate - truncate database. Cyclomatic complexity 1
 func (e Explorer) Truncate() error {
 	c := e.Db.Database(e.DbName).Collection(e.DbCollection)
 	_, err := c.DeleteMany(context.Background(), bson.D{})
