@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"io/ioutil"
+	"log"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 )
 
@@ -15,18 +15,25 @@ type TestCase struct {
 
 func TestGet(t *testing.T) {
 	for caseNum, item := range createCases() {
-		url := "http://localhost/post?id=" + item.ID
-		req := httptest.NewRequest("GET", url, nil)
-		w := httptest.NewRecorder()
+		url := "https://localhost:8080/post?id=" + item.ID
+		//log.Printf("url %v", url)
+		//req := httptest.NewRequest("GET", url, nil)
+		//w := httptest.NewRecorder()
 
-		GetPost3(w, req)
-
-		if w.Code != item.StatusCode {
-			t.Errorf("[%d] wrong StatusCode: got %d, expected %d",
-				caseNum, w.Code, item.StatusCode)
+		//GetPost3(w, req)
+		resp, err := http.Get(url)
+		log.Printf("url %v", url)
+		if err != nil {
+			t.Errorf("error %v", err)
 		}
+		defer resp.Body.Close()
 
-		resp := w.Result()
+		//if w.Code != item.StatusCode {
+		//	t.Errorf("[%d] wrong StatusCode: got %d, expected %d",
+		//		caseNum, w.Code, item.StatusCode)
+		//}
+
+		//resp := w.Result()
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			t.Error(err)
