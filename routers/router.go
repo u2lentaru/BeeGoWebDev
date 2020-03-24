@@ -17,6 +17,7 @@ const (
 	collectionName = "posts"
 )
 
+// init. Cyclomatic complexity 5
 func init() {
 	//db, err := sql.Open("mysql", dsn)
 	//db, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))

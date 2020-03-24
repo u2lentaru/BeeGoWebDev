@@ -16,7 +16,7 @@ type PostController struct {
 	Explorer Explorer
 }
 
-// Get func
+// Get func. Cyclomatic complexity 3
 func (c *PostController) Get() {
 	id := c.Ctx.Request.URL.Query().Get("id")
 
@@ -36,6 +36,7 @@ func (c *PostController) Get() {
 	c.TplName = "post.tpl"
 }
 
+// getPost. Cyclomatic complexity 2
 func (e Explorer) getPost(id string) (models.TPost, error) {
 	c := e.Db.Database(e.DbName).Collection(e.DbCollection)
 
@@ -56,7 +57,7 @@ func (e Explorer) getPost(id string) (models.TPost, error) {
 	curl.exe -vX POST -H "Content-Type: application/json"  -d "@data.json" http://localhost:8080/post
 */
 
-// Post func
+// Post func. Cyclomatic complexity 3
 func (c *PostController) Post() {
 	resp := new(postRequest)
 
@@ -88,7 +89,7 @@ func (c *PostController) Post() {
 	curl.exe -vX PUT -H "Content-Type: application/json"  -d"@data.json" http://localhost:8080/post?id=46
 */
 
-// Put func
+// Put func. Cyclomatic complexity 4
 func (c *PostController) Put() {
 	id := c.Ctx.Request.URL.Query().Get("id")
 
@@ -128,7 +129,7 @@ func (c *PostController) Put() {
 	curl.exe -vX DELETE  http://localhost:8080/post?id=46
 */
 
-// Delete func
+// Delete func. Cyclomatic complexity 3
 func (c *PostController) Delete() {
 	id := c.Ctx.Request.URL.Query().Get("id")
 
