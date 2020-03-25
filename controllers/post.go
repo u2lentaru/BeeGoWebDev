@@ -26,6 +26,9 @@ func (c *PostController) Get() {
 		return
 	}
 
+	//c.Ctx.ResponseWriter.WriteHeader(http.StatusOK)
+	//io.WriteString(c.Ctx.ResponseWriter, `{"status": 200, "resp": {"post": 3}}`)
+
 	post, err := c.Explorer.getPost(id)
 	if err != nil {
 		log.Fatal(err)
